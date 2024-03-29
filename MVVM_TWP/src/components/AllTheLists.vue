@@ -5,7 +5,7 @@ import WPAPI from 'wpapi'
 
 const categories = ref([]);
 
-const fetchLists = async () => {
+const fetchCategories = async () => {
   const wp = new WPAPI({
     endpoint: 'http://localhost/wordpress/index.php/wp-json/',
     username: 'clemerick',
@@ -24,7 +24,7 @@ const fetchLists = async () => {
   };
 
 
-const deleteList = async (category) => {
+const deleteList = async (categoryId) => {
   const wp = new WPAPI({
     endpoint: 'http://localhost/wordpress/index.php/wp-json/',
     username: 'clemerick',
@@ -32,11 +32,11 @@ const deleteList = async (category) => {
   });
 
     // supprimer une liste
-   await wp.categories().id(category).delete({ force: true })
+   await wp.categories().id(categoryId).delete({ force: true })
     .then(() => {
       console.log('Select category has been deleted :(');
       confirm('Your list has been successfully deleted !');
-      fetchLists();
+      fetchCategories();
     })
     .catch(err => {
       console.log(err);
@@ -44,23 +44,23 @@ const deleteList = async (category) => {
   };
   
   onMounted(() => {
-  fetchLists();
+  fetchCategories();
 });
 
-const saveList = async (category) => {
+const saveList = async (categoryId) => {
   const wp = new WPAPI({
     endpoint: 'http://localhost/wordpress/index.php/wp-json/',
     username: 'clemerick',
     password: 'clemerick'
   });
     // enregistrer le changement de nom d'une liste
-   await wp.categories().id(category.id).update({
-    name: category.name,
+   await wp.categories().id(categoryId.id).update({
+    name: categoryId.name,
    })
     .then(() => {
-      console.log("Category's name has been edited !");
+      console.log("CategoryId's name has been edited !");
       confirm("Your list's name has been edited !");
-      fetchLists();
+      fetchCategories();
     })
     .catch(err => {
       console.log(err);
