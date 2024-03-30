@@ -1,6 +1,10 @@
 <script setup>
 import { RouterView } from "vue-router";
+import { ref } from 'vue';
 import ClemAllTheListsEdited from "./components/ClemAllTheListsEdited.vue";
+import ThisCardView from './components/ThisCardView.vue';
+
+
 </script>
 
 <template>
@@ -13,8 +17,9 @@ import ClemAllTheListsEdited from "./components/ClemAllTheListsEdited.vue";
       </div>
     </div>
   </header>
-<!-- 
-  <RouterView /> -->
+  <!-- <div>
+    <ThisCardView />
+  </div> -->
 </template>
 
 <style scoped>

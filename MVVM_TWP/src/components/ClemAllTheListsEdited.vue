@@ -30,20 +30,27 @@ const fetchCategories = async () => {
     // recup des categories
     const categoriesData = await wp.categories();
     const categoriesWithCards = await Promise.all(categoriesData.map(async (category) => {
-      //récup les cartes pour chaque catégorie avc WPAPI
+      // récup les posts dans chaque catégorie
       const cardsData = await wp.posts().categories(category.id);
       const cards = cardsData.map(card => ({
         id: card.id,
         title: card.title.rendered,
         content: card.content.rendered.replace(/<\/?p>/g, '')
       }));
+      
       // 2 lignes color
       const color = getRandomColor();
-      return { id: category.id, name: category.name, cards, color }; 
+      return {
+        id: category.id, 
+        name: category.name, 
+        cards, 
+        color 
+      }; 
     }));
+
     categories.value = categoriesWithCards;
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    console.error(error);
   }
 };
 
@@ -94,11 +101,9 @@ const saveList = async (categoryId) => {
 // Add une card
 const addCard = async (categoryId) => {
   try {
-    // new card
     const newCard = {
       title: 'New card'
     };
-    // WPAPI pour new card
     const response = await wp.posts().create({
       title: 'newCard.title',
       content: '',
@@ -106,7 +111,6 @@ const addCard = async (categoryId) => {
       categories: [categoryId]
     });
     if (response.id) {
-      // Add new card à la liste des cartes de la catégorie
       categories.value.forEach(category => {
         if (category.id === categoryId) {
           category.cards.push({
@@ -120,7 +124,7 @@ const addCard = async (categoryId) => {
       console.error('Error creating card');
     }
   } catch (error) {
-    console.error('Error creating card:', error);
+    console.error(error);
   }
 };
 
@@ -142,10 +146,66 @@ const deleteCard = async (categoryId, cardId, cardIndex) => {
   }
 };
 
-// Open a card
+// edit une card
+const selectedCard = ref(null);
+const saveCardChanges = async () => {
+  try {
+    if (selectedCard.value) {
+      
+      const wp = new WPAPI({
+        endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+        username: 'clemerick',
+        password: 'clemerick'
+      });
+    
+      await wp.posts().id(selectedCard.value.id).update({
+        title: selectedCard.value.title,
+        content: selectedCard.value.content.replace(/<[^>]*>/g, ''),
+      });
+  
+      console.log("The card has been edited");
+      confirm("Your card has been successfully edited ! :)");
+      closeCardModal();
+    } else {
+      console.error('No card selected');
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
 
+// récupérer les commentaires d'une card
+const fetchCommentsForCard = async (card) => {
+  try {
+    const commentsData = await wp.posts().id(card.id).comments();
+    const comments = commentsData.map(comment => ({
+      id: comment.id,
+      content: comment.content.rendered
+    }));
+    return comments;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
 
-// Edit a card
+// ouvrir une card via un modal (pop-up) avec ses comments
+const openCardModal = async (card) => {
+  try {
+    const comments = await fetchCommentsForCard(card);
+    card.comments = comments; // add les comments à la carte
+    selectedCard.value = card;
+  } catch (error) {
+    console.error('Error fetching comments for card:', error);
+  }
+};
+// fermer...
+const closeCardModal = () => {
+  selectedCard.value = null;
+};
+
+// supprimer les balises html
+// .replace(/<[^>]*>/g, '')
 
 onMounted(fetchCategories);
 </script>
@@ -153,7 +213,7 @@ onMounted(fetchCategories);
 <template>
   <div id="app">
     <div class="board">
-      <div><CreateList class="create-list-button" role="button"/></div>
+      <p><CreateList class="create-list-button" role="button"/></p>
       <div v-for="(category, index) in categories" :key="index" class="column" :style="{ backgroundColor: category.color }">
         <button class="add-card-button" @click="saveList(category)">Save list's name</button>
         <button class="add-card-button" @click="deleteList(category.id)">Delete the list</button>
@@ -162,24 +222,90 @@ onMounted(fetchCategories);
         <div class="cards" :style="{ backgroundColor: category.color }">
           <div v-for="(card, cardIndex) in category.cards" :key="cardIndex" class="card" :style="{ backgroundColor: category.color }">
             <div class="card-header">
-              <div class="card-title">{{ card.title }}</div>
+              <div class="card-title">{{ card.title }}</div> 
+              <button @click="openCardModal(card)" class="see-button">👁</button>
+              <!-- AJOUTER TOUTE LA CARTE EN DEROULANT AU CLICK DU BOUTON ET LA RENDRE MODIFIABLE DIRECTEMENT ??? -->
               <button class="delete-button" @click="deleteCard(category.id, card.id, cardIndex)">x</button>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <!-- CECI EST UN ELEMENT MODAL, EQUIVALENT D'UN POP UP QUI AFFICHE LE CONTENU D'UNE CARD ET SES COMMENTAIRES -->
+    <Modal v-if="selectedCard" @close="closeCardModal">
+      <div class="modal-overlay">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button @click="closeCardModal" class="close-button">X</button>
+          </div>
+          <div class="modal-body">
+            <div v-if="selectedCard">
+              <input class="modalcardname" type="text" v-model="selectedCard.title"/><br/><br/>
+              <h5>Description :</h5>
+              <textarea rows="8" cols="30" type="text" v-model="selectedCard.content"></textarea><br/>
+              <button @click="saveCardChanges" class="save-button">Save changes</button><br/><br/>
+              <h5>Comments :</h5>
+                <div v-for="(comment, index) in selectedCard.comments" :key="index">
+                  <input type="text" v-model="comment.content"/>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <style>
+.modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.5);
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.modal-content {
+color: black;
+background-color: white;
+padding: 20px;
+border-radius: 5px;
+box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 10px;
+}
+
+.modalcardname {
+  /* style à ajouter */
+}
+
+.close-button {
+background: none;
+border: none;
+cursor: pointer;
+font-size: 20px;
+}
+
+.modal-body {
+/* Style du corps du modal */
+}
+
 .board {
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 2%;
 }
 
 .column {
-  flex: 1;
   background-color: #ebecf0;
   border-radius: 3px;
   padding: 8px;
@@ -222,10 +348,6 @@ onMounted(fetchCategories);
   font-weight: bold;
 }
 
-.card-content {
-  margin-top: 8px;
-}
-
 .add-card-button {
   background-color: transparent;
   color: black;
@@ -240,13 +362,17 @@ onMounted(fetchCategories);
 }
 
 .create-list-button {
-  background-color: transparent;
-  color: white;
+  background-color: goldenrod;
+  color: black;
+  padding: 8px 10px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
+  font-size: 150%;
   cursor: pointer;
   border-radius: 3px;
+  margin-top: 35%;
+  margin-left: 25%;
 }
 
 .add-card-button:hover {
@@ -260,6 +386,16 @@ onMounted(fetchCategories);
   border-radius: 50%;
   cursor: pointer;
   padding: 5px 8px;
+}
+
+.see-button {
+  background-color: transparent;
+  color: black;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 5px 8px;
+  margin-left: 20%;
 }
 
 .delete-button:hover {
