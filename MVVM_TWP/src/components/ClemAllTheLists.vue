@@ -37,7 +37,7 @@ const getRandomColor = () => {
 
 // WPAPI
 const wp = new WPAPI({
-  endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+  endpoint: 'http://localhost:8888/wordpress/wp-json',
   username: 'clemerick',
   password: 'clemerick'
 });

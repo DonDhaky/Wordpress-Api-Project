@@ -1,3 +1,6 @@
+
+
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import CreateList from '../components/CreateList.vue'
@@ -17,7 +20,7 @@ const getRandomColor = () => {
 
 // WPAPI
 const wp = new WPAPI({
-  endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+  endpoint: 'http://localhost:8888/wordpress/wp-json',
   username: 'clemerick',
   password: 'clemerick'
 });
@@ -57,7 +60,7 @@ const fetchCategories = async () => {
 // supprimer une list
 const deleteList = async (categoryId) => {
   const wp = new WPAPI({
-    endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+    endpoint: 'http://localhost:8888/wordpress/wp-json',
     username: 'clemerick',
     password: 'clemerick'
   });
@@ -79,7 +82,7 @@ const deleteList = async (categoryId) => {
 // save le nom d'une liste
 const saveList = async (categoryId) => {
   const wp = new WPAPI({
-    endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+    endpoint: 'http://localhost:8888/wordpress/wp-json',
     username: 'clemerick',
     password: 'clemerick'
   });
@@ -153,7 +156,7 @@ const saveCardChanges = async () => {
     if (selectedCard.value) {
       
       const wp = new WPAPI({
-        endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+        endpoint: 'http://localhost:8888/wordpress/wp-json',
         username: 'clemerick',
         password: 'clemerick'
       });
@@ -215,19 +218,22 @@ onMounted(fetchCategories);
     <div class="board">
       <p><CreateList class="create-list-button" role="button"/></p>
       <div v-for="(category, index) in categories" :key="index" class="column" :style="{ backgroundColor: category.color }">
-        <button class="add-card-button" @click="saveList(category)">Save list's name</button>
-        <button class="add-card-button" @click="deleteList(category.id)">Delete the list</button>
-        <input type="text" v-model="category.name" id="column-header" />
-          <button class="add-card-button" @click="addCard(category.id)">+ Add a card</button>
-        <div class="cards" :style="{ backgroundColor: category.color }">
-          <div v-for="(card, cardIndex) in category.cards" :key="cardIndex" class="card" :style="{ backgroundColor: category.color }">
-            <div class="card-header">
-              <div class="card-title">{{ card.title }}</div> 
-              <button @click="openCardModal(card)" class="see-button">👁</button>
-              <!-- AJOUTER TOUTE LA CARTE EN DEROULANT AU CLICK DU BOUTON ET LA RENDRE MODIFIABLE DIRECTEMENT ??? -->
-              <button class="delete-button" @click="deleteCard(category.id, card.id, cardIndex)">x</button>
+        <div class="save-button-container">
+          <input type="text" v-model="category.name" id="column-header" />
+            <button class="save-button checkmark" @click="saveList(category)"></button>
+             <button class="save-button" @click="deleteList(category.id)">x</button>
+              <button class="add-card-button" @click="addCard(category.id)">+ Add a card</button>
+                <div class="cards" :style="{ backgroundColor: category.color }">
+                  <div v-for="(card, cardIndex) in category.cards" :key="cardIndex" class="card" :style="{ backgroundColor: category.color }">
+                    <div class="card-header">
+                     <div class="card-title">{{ card.title }}</div> 
+                      <button @click="openCardModal(card)" class="see-button">👁</button>
+                      <!-- AJOUTER TOUTE LA CARTE EN DEROULANT AU CLICK DU BOUTON ET LA RENDRE MODIFIABLE DIRECTEMENT ??? -->
+                        <button class="delete-button" @click="deleteCard(category.id, card.id, cardIndex)">x</button>
+            
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -257,31 +263,51 @@ onMounted(fetchCategories);
 </template>
 
 <style>
+
+
+.checkmark::before {
+  content: '✓';
+}
+.save-button-container {
+  position: relative;
+}
+
+.save-button {
+  position: relative;
+  bottom: -10px;
+  left: 5px; 
+  transform: translateY(-50%);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
 .modal-overlay {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background-color: rgba(0, 0, 0, 0.5);
-display: flex;
-justify-content: center;
-align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal-content {
-color: black;
-background-color: white;
-padding: 20px;
-border-radius: 5px;
-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  color: black;
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }
 
 .modal-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .modalcardname {
@@ -289,16 +315,17 @@ margin-bottom: 10px;
 }
 
 .close-button {
-background: none;
-border: none;
-cursor: pointer;
-font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
 }
 
 .modal-body {
-/* Style du corps du modal */
+  /* Style du corps du modal */
 }
 
+/* Style pour les grandes résolutions */
 .board {
   display: grid;
   grid-template-columns: repeat(4, auto);
@@ -320,6 +347,9 @@ font-size: 20px;
   color: #fff; 
   padding: 8px;
   border-radius: 3px;
+}
+#column-header {
+  width: 80%;
 }
 
 .cards {
@@ -389,13 +419,14 @@ font-size: 20px;
 }
 
 .see-button {
+  position : absolute;
   background-color: transparent;
   color: black;
   border: none;
   border-radius: 50%;
   cursor: pointer;
   padding: 5px 8px;
-  margin-left: 20%;
+  margin-left: 63%;
 }
 
 .delete-button:hover {
@@ -414,4 +445,32 @@ font-size: 20px;
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
+
+/* Media queries responsive à partir de 500 pixels */
+@media screen and (max-width: 500px) {
+  .board {
+    grid-template-columns: repeat(1, auto);
+    gap: 5%;
+  }
+
+  .column {
+    margin: 0 auto 20px;
+    min-width: calc(100% - 16px);
+  }
+
+  .add-card-button {
+    margin-top: 0;
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .create-list-button {
+    margin-top: 15%;
+    margin-left: 0;
+    width: 100%;
+    font-size: 120%;
+  }
+}
+
+
 </style>

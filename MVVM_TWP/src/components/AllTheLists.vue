@@ -7,7 +7,7 @@ const categories = ref([]);
 
 const fetchCategories = async () => {
   const wp = new WPAPI({
-    endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+    endpoint: 'http://localhost:8888/wordpress/wp-json',
     username: 'clemerick',
     password: 'clemerick'
   });
@@ -26,7 +26,7 @@ const fetchCategories = async () => {
 
 const deleteList = async (categoryId) => {
   const wp = new WPAPI({
-    endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+    endpoint: 'http://localhost:8888/wordpress/wp-json',
     username: 'clemerick',
     password: 'clemerick'
   });
@@ -49,7 +49,7 @@ const deleteList = async (categoryId) => {
 
 const saveList = async (categoryId) => {
   const wp = new WPAPI({
-    endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+    endpoint: 'http://localhost:8888/wordpress/wp-json',
     username: 'clemerick',
     password: 'clemerick'
   });

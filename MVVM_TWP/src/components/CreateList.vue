@@ -6,7 +6,7 @@ const categories = reactive([]);
 
 const fetchLists = async () => {
   const wp = new WPAPI({
-    endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+    endpoint: 'http://localhost:8888/wordpress/wp-json',
     username: 'clemerick',
     password: 'clemerick'
   });
@@ -24,7 +24,7 @@ const fetchLists = async () => {
 
 const addList = async () => {
   const wp = new WPAPI({
-    endpoint: 'http://localhost/wordpress/index.php/wp-json/',
+    endpoint: 'http://localhost:8888/wordpress/wp-json',
     username: 'clemerick',
     password: 'clemerick'
   });
