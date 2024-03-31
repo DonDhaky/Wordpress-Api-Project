@@ -58,7 +58,7 @@ const addList = async () => {
 </script>
 
 <template>
-  <div @click="addList">Add a list</div>
+  <div @click="addList">+ Add a list</div>
 </template>
 
 <style></style>
