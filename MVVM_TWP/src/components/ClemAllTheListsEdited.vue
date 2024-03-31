@@ -378,7 +378,7 @@ onMounted(fetchCategories);
   font-weight: bold;
 }
 
-.add-card-button {
+/* .add-card-button {
   background-color: transparent;
   color: black;
   padding: 8px 10px;
@@ -389,6 +389,18 @@ onMounted(fetchCategories);
   margin-top: 8px;
   cursor: pointer;
   border-radius: 3px;
+} */
+
+.add-card-button {
+  position: relative;
+  bottom: -18px;
+  left: 5px; 
+  transform: translateY(-50%);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+   font-weight: bold;
 }
 
 .create-list-button {
