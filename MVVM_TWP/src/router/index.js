@@ -1,16 +1,15 @@
+import ClemAllTheListsEdited from '@/components/ClemAllTheListsEdited.vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import AllTheLists from '@/components/AllTheLists.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: AllTheLists // on écrit comme ça si c'est un component
-    },
-      // component: () => import('../views/AboutView.vue') -----> on écrit comme ça si c'est une vue
-  ]
-})
+      {
+        path : "/",
+        name : 'home',
+        component: ClemAllTheListsEdited,
+      }
+  ],
+});
 
-export default router
+export default router;
