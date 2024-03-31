@@ -7,6 +7,8 @@ import CreateList from '../components/CreateList.vue'
 import WPAPI from 'wpapi';
 
 const categories = ref([]);
+const newComment = ref('');
+// com pour le pop up
 
 // color
 const getRandomColor = () => {
@@ -251,9 +253,13 @@ onMounted(fetchCategories);
               <textarea rows="8" cols="30" type="text" v-model="selectedCard.content"></textarea><br/>
               <button @click="saveCardChanges" class="save-button">Save changes</button><br/><br/>
               <h5>Comments :</h5>
-                <div v-for="(comment, index) in selectedCard.comments" :key="index">
-                  <input type="text" v-model="comment.content"/>
-                </div>
+              <!-- un com pour le pop up-->
+              <div v-for="(comment, index) in selectedCard.comments" :key="index">
+                <input type="text" v-model="comment.content"/>
+              </div>
+              
+              <textarea rows="4" cols="30" v-model="newComment" placeholder="Add a comment"></textarea>
+              <button @click="addComment" class="save-button">Add Comment</button>
             </div>
           </div>
         </div>
@@ -400,12 +406,12 @@ onMounted(fetchCategories);
   border: none;
   cursor: pointer;
   font-size: 16px;
-   font-weight: bold;
+  font-weight: bold;
 }
 
 .create-list-button {
-  background-color: goldenrod;
-  color: black;
+  background-color: none;
+  color: white;
   padding: 8px 10px;
   text-align: center;
   text-decoration: none;
@@ -415,6 +421,7 @@ onMounted(fetchCategories);
   border-radius: 3px;
   margin-top: 35%;
   margin-left: 25%;
+  font-weight: bold;
 }
 
 .add-card-button:hover {
